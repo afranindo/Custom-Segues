@@ -13,20 +13,25 @@ class UncoverVerticalSegue: UIStoryboardSegue {
     override func perform() {
         var sourceViewController = self.sourceViewController as UIViewController!
         var destinationViewController = self.destinationViewController as UIViewController!
+        var duplicatedSourceView: UIView = sourceViewController.view.snapshotViewAfterScreenUpdates(false) // Create a screenshot of the old view.
         
+        /* We add a screenshot of the old view (Bottom) above the new one (Top), it looks like nothing changed. */
+        destinationViewController.view.addSubview(duplicatedSourceView)
+        
+        /* Our main view is now destinationViewController. */
         sourceViewController.presentViewController(destinationViewController, animated: false, completion: {
-            destinationViewController.view.addSubview(sourceViewController.view) // We add the old view (Bottom) above the new one (Top), it looks like nothing changed.
-            
-            UIView.animateWithDuration(0.33, delay: 0.0, options: UIViewAnimationOptions.CurveEaseOut, animations: { () -> Void in
-                /* This is the block affected by the animation.
-                Duration: 0,33s
-                Options: Ease-Out speed curve.
-                */
-                sourceViewController.view.transform = CGAffineTransformMakeTranslation(0, sourceViewController.view.frame.size.height) // We slide the old view at the bottom of the screen
-                }) { (finished: Bool) -> Void in
-                    // The animation is finished, we removed the old view.
-                    sourceViewController.view.removeFromSuperview()
-            }
+            UIView.animateWithDuration(0.33, delay: 0.0, options: UIViewAnimationOptions.CurveEaseOut,
+                animations: { () -> Void in
+                    /*
+                    This is the block affected by the animation. Duration: 0,33s. Options: Ease-Out speed curve.
+                    We slide the old view's screenshot at the bottom of the screen.
+                    */
+                    duplicatedSourceView.transform = CGAffineTransformMakeTranslation(0, duplicatedSourceView.frame.size.height)
+                },
+                completion: { (finished: Bool) -> Void in
+                    /* The animation is finished, we removed the old view's screenshot. */
+                    duplicatedSourceView.removeFromSuperview()
+            })
         })
     }
 }
